@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head><title>Icon Generator</title></head>
+<body>
+<canvas id="c192" width="192" height="192"></canvas>
+<canvas id="c512" width="512" height="512"></canvas>
+<script>
+function drawIcon(canvas) {
+  const s = canvas.width;
+  const ctx = canvas.getContext('2d');
+  const bg = ctx.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);
+  bg.addColorStop(0,'#1a0a00'); bg.addColorStop(1,'#000');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,s,s);
+  ctx.fillStyle='#FF6600';
+  ctx.font=`bold ${s*.55}px Arial Black`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.shadowColor='#FF4400'; ctx.shadowBlur=s*.1;
+  ctx.fillText('A',s/2,s/2+s*.03);
+  document.body.appendChild(document.createElement('br'));
+  const a=document.createElement('a');
+  a.download=`icon-${s}.png`;
+  a.href=canvas.toDataURL();
+  a.textContent=`Download ${s}px`;
+  document.body.appendChild(a);
+}
+drawIcon(document.getElementById('c192'));
+drawIcon(document.getElementById('c512'));
+</script>
+</body>
+</html>

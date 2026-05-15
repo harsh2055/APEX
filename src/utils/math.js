@@ -1,0 +1,11 @@
+export const lerp = (a,b,t) => a+(b-a)*t;
+export const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
+export const smoothFactor = (base,dt) => 1-Math.pow(base,dt);
+export const distSq = (ax,az,bx,bz) => (ax-bx)**2+(az-bz)**2;
+export const dist2D = (ax,az,bx,bz) => Math.sqrt(distSq(ax,az,bx,bz));
+export const toKMH = (fwdSpd,factor) => Math.abs(Math.round(fwdSpd*factor));
+export const wrapAngle = angle => ((angle%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+export const randRange = (min,max) => min+Math.random()*(max-min);
+export const randItem = arr => arr[Math.floor(Math.random()*arr.length)];
+export const forwardVec = angle => new THREE.Vector3(Math.sin(angle),0,Math.cos(angle));
+export const rightVec   = angle => new THREE.Vector3(Math.cos(angle),0,-Math.sin(angle));

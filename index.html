@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#FF6600">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Apex City">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Open-world GT racing with NOS boost, traffic AI, night mode and drift physics">
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Apple touch icons (inline SVG encoded) -->
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
+<title>APEX CITY 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<!-- ── LOADING SCREEN ──────────────────────────────────────────────────── -->
+<div id="loading">
+  <div id="loading-title">APEX CITY</div>
+  <div id="loading-text">LOADING</div>
+  <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
+  <div id="loading-sub">GT RACING EDITION</div>
+</div>
+
+<!-- ── START SCREEN ───────────────────────────────────────────────────── -->
+<div id="start" style="display:none">
+  <div id="start-title">APEX CITY</div>
+  <div id="start-sub">GT RACING EDITION</div>
+  <div id="start-features">
+    <div class="feat">340 KM/H</div>
+    <div class="feat">GT Racing Car</div>
+    <div class="feat">NOS Boost</div>
+    <div class="feat">Traffic AI</div>
+    <div class="feat">Night Mode</div>
+    <div class="feat">Open World</div>
+  </div>
+  <div id="start-prompt">TAP TO ENTER THE CITY</div>
+  <!-- PWA install button — shown only when installable -->
+  <div id="install-btn" style="display:none">
+    <span>⬇</span> Add to Home Screen
+  </div>
+</div>
+
+<!-- ── GAME CANVAS ────────────────────────────────────────────────────── -->
+<canvas id="c"></canvas>
+
+<!-- ── HUD ────────────────────────────────────────────────────────────── -->
+<div id="hud" style="display:none">
+
+  <div id="vignette"></div>
+  <div id="nos-flash"></div>
+  <div id="speed-lines"></div>
+  <div id="dmg-flash"></div>
+
+  <!-- Top bar -->
+  <div id="topbar">
+    <div id="mission-wrap">
+      <div id="mission-label">MISSION</div>
+      <div id="mission-text">Find Passenger</div>
+    </div>
+    <div id="money">$0</div>
+  </div>
+
+  <!-- Wanted stars -->
+  <div id="wanted">
+    <span class="wstar" id="s1">★</span>
+    <span class="wstar" id="s2">★</span>
+    <span class="wstar" id="s3">★</span>
+    <span class="wstar" id="s4">★</span>
+    <span class="wstar" id="s5">★</span>
+  </div>
+
+  <!-- Speedometer -->
+  <div id="speedometer">
+    <svg id="speedo-svg" viewBox="0 0 220 220">
+      <defs>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <circle cx="110" cy="110" r="95"  fill="rgba(0,0,0,0.65)" stroke="rgba(255,130,0,0.12)" stroke-width="1"/>
+      <path id="speed-arc-bg" d="" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="10" stroke-linecap="round"/>
+      <path id="speed-arc"    d="" fill="none" stroke="#FF6600" stroke-width="10" stroke-linecap="round" filter="url(#glow)"/>
+      <g id="ticks"></g>
+      <line id="needle" x1="110" y1="110" x2="110" y2="38"
+            stroke="rgba(255,120,30,0.9)" stroke-width="2.5" stroke-linecap="round" filter="url(#glow)"/>
+      <circle cx="110" cy="110" r="7" fill="#1a1a2e" stroke="rgba(255,120,30,0.6)" stroke-width="2"/>
+    </svg>
+    <div id="spd-num">
+      <div id="spd-val">0</div>
+      <div id="spd-unit">km/h</div>
+      <div id="gear-box">N</div>
+    </div>
+    <div id="rpm-bar-wrap"><div id="rpm-bar"></div></div>
+  </div>
+
+  <!-- NOS bar -->
+  <div id="nos-indicator">
+    <div id="nos-label">🔥 NOS</div>
+    <div id="nos-bar-outer"><div id="nos-bar-inner"></div></div>
+  </div>
+
+  <!-- Status bars -->
+  <div id="status">
+    <div class="sbar">
+      <div class="sbar-label">Fuel</div>
+      <div class="sbar-track"><div class="sbar-fill" id="fuel-fill" style="width:100%;background:#f1c40f"></div></div>
+    </div>
+    <div class="sbar">
+      <div class="sbar-label">Damage</div>
+      <div class="sbar-track"><div class="sbar-fill" id="dmg-fill" style="width:0%;background:#e74c3c"></div></div>
+    </div>
+  </div>
+
+  <!-- Minimap -->
+  <div id="minimap"><canvas id="mm-canvas" width="180" height="180"></canvas></div>
+
+  <!-- Keyboard hint (hidden on touch devices) -->
+  <div id="controls-hint">
+    <b>W/↑</b> Accel &nbsp; <b>S/↓</b> Brake<br>
+    <b>A/D</b> Steer &nbsp; <b>SPACE</b> Drift<br>
+    <b>SHIFT</b> <span style="color:#FF8800">NOS</span><br>
+    <b>N</b> Night &nbsp; <b>R</b> Rain &nbsp; <b>C</b> Cam
+  </div>
+
+  <!-- Notification toast -->
+  <div id="notif"></div>
+
+  <!-- FPS counter -->
+  <div id="perf"></div>
+
+  <!-- Touch controls -->
+  <div id="touch-ui">
+    <div id="joystick-zone"><div id="joystick-knob"></div></div>
+    <div class="tbtn" id="btn-brake">BRAKE</div>
+    <div class="tbtn" id="btn-drift">DRIFT</div>
+    <div class="tbtn" id="btn-nos">NOS🔥</div>
+  </div>
+
+</div><!-- /#hud -->
+
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
